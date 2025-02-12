@@ -1,0 +1,16 @@
+.home-container {
+    width: 100vw;
+    height: 100vh; /* Ensures it doesn't exceed the screen height */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+  
+  .home-image {
+    width: 100vw; 
+    height: 100vh; 
+    object-fit: cover; /* Prevents stretching, keeps proportions */
+  }
