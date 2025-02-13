@@ -5,6 +5,7 @@ import { auth,db } from "../../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { doc, setDoc } from "../../firebaseConfig";
 
+
 import "./Signup.css";
 import { ToastContainer, toast } from "react-toastify";
 
@@ -13,6 +14,8 @@ const Signup = () => {
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+
+    const navigate = useNavigate();
   
     const handleSignup = async (e) => {
       e.preventDefault();
@@ -29,6 +32,8 @@ const Signup = () => {
         });
   
         toast.success("Signup successful! 🎉");
+        navigate("/user");
+
       } catch (error) {
         console.error("Error signing up:", error.message);
         toast.error(error.message);
