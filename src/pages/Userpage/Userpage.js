@@ -1,56 +1,71 @@
-import React from "react";
-import { Container, Typography, Button } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Container, Typography, Button, AppBar, Toolbar, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { auth,db } from "../../firebaseConfig"; 
-import { signOut } from "firebase/auth";
-
-import { useEffect, useState } from "react";
-
-import { doc, getDoc, setDoc} from "../../firebaseConfig";
-
+import { auth, db } from "../../firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
+import WebcamCapture from "../../components/WebcamCapture/WebcamCapture";
 
 const UserPage = () => {
-    const [userName, setUserName] = useState("");
-    const navigate = useNavigate();
-  
-    useEffect(() => {
-      const fetchUserName = async () => {
-        const user = auth.currentUser;
-        console.log("Current User:", user); // Log the user object
-  
-        if (user) {
-          try {
-            const userDocRef = doc(db, "users", user.uid);
-            console.log("Fetching document for UID:", user.uid);
-  
-            const userDoc = await getDoc(userDocRef);
-            if (userDoc.exists()) {
-              console.log("User Document Data:", userDoc.data()); // Log the fetched data
-              setUserName(userDoc.data().firstName); // Assuming 'name' field exists
-            } else {
-              console.log("User document not found in Firestore");
-            }
-          } catch (error) {
-            console.error("Error fetching user data:", error);
+  const [userName, setUserName] = useState("");
+  const [score, setScore] = useState(0); // Placeholder for future score tracking
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        try {
+          const userDocRef = doc(db, "users", user.uid);
+          const userDoc = await getDoc(userDocRef);
+          if (userDoc.exists()) {
+            console.log("User Document Data:", userDoc.data());
+            setUserName(userDoc.data().firstName || "User");
+          } else {
+            console.log("User document not found in Firestore");
           }
-        } else {
-          console.log("No authenticated user found");
+        } catch (error) {
+          console.error("Error fetching user data:", error);
         }
-      };
-  
-      fetchUserName();
-    }, []);
-  
-    const handleLogout = async () => {
-      try {
-        await auth.signOut();
-        navigate("/"); // Redirect to login page
-      } catch (error) {
-        console.error("Logout error:", error);
+      } else {
+        console.log("No authenticated user found");
       }
     };
-  
-    return (
+
+    fetchUserName();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await auth.signOut();
+      navigate("/"); // Redirect to homepage
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        minHeight: "100vh",
+        backgroundColor: "#F5F5F5",
+      }}
+    >
+      {/* Top Score Bar */}
+      <AppBar position="static" sx={{ backgroundColor: "#0D1B2A", padding: 1 }}>
+        <Toolbar sx={{ justifyContent: "space-between" }}>
+          <Typography variant="h6" sx={{ color: "#E0E1DD", fontWeight: "bold" }}>
+            Welcome, {userName}!
+          </Typography>
+          <Typography variant="h6" sx={{ color: "#E0E1DD" }}>
+            Score: {score}
+          </Typography>
+        </Toolbar>
+      </AppBar>
+
+      {/* Main Content */}
       <Container
         maxWidth="sm"
         sx={{
@@ -58,17 +73,22 @@ const UserPage = () => {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          minHeight: "100vh",
+          flexGrow: 1,
+          mt: 4,
         }}
       >
-        <Typography variant="h3" gutterBottom>
-          Welcome, {userName ? userName : "User"}!
-        </Typography>
-        <Button variant="contained" color="secondary" onClick={handleLogout}>
+        <WebcamCapture />
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={handleLogout}
+          sx={{ mt: 3 }}
+        >
           Logout
         </Button>
       </Container>
-    );
-  };
-  
-  export default UserPage;
+    </Box>
+  );
+};
+
+export default UserPage;
